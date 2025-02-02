@@ -17,7 +17,7 @@ En aquesta secció, et mostrem com interactuar amb els diferents endpoints de l'
 ### 3. **Veure les Lletres de l'Abecedari**
    Aquest és l'endpoint que et retorna totes les lletres de l'abecedari. Pots fer una sol·licitud `GET` i obtenir la llista de lletres.
 
-   ![Captura de Abecedari](ACTIVITAT_11/imagtes/swaggerlletres.png)
+   ![Captura de Abecedari](ACTIVITAT_11/imatges/swaggerlletres.png)
 
 ### 4. **Obtenir Informació del Jugador**
    En aquesta captura, pots veure com obtenir la informació d'un jugador específic utilitzant el seu ID. La sol·licitud és de tipus `GET` a l'endpoint `/jugador/{id}`.

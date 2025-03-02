@@ -1,36 +1,27 @@
 from fastapi import FastAPI
 from typing import List
-
-import options_sch
-#from pydantic import BaseModel
 import read
-#import read
-
-
-
+import options_sch
 
 app = FastAPI()
-
-
 
 @app.get("/")
 async def root():
     return {"message": "Benvingut a fastapi"}
 
-
-# Mètode per extreure les 5 opcions i podre-les mostrar a la llista de selecció d'opcions del penjat
+# Ruta para obtener las opciones de temáticas
 @app.get("/penjat/tematica/opcions", response_model=List[dict])
 async def get_options():
-    return options_sch.options_schema(read.read_db())
+    # Obtener las opciones de la base de datos
+    options = read.read_db()
+    return options_sch.options_schema(options)
 
-
-# En aquesta consulta get ecaldrà que el frontend envii a {option} la opció seleccionada en la llista del joc
-@app.get("/penjat/tematica/{option}", response_model=List[dict])
+# Ruta para obtener una palabra según el tema seleccionado
+@app.get("/penjat/tematica/{option}", response_model=dict)
 async def get_word(option: str):
-    word = options_sch.options_schema(read.read_word_db(option))
-    print("")
+    # Obtener la palabra asociada al tema
+    word = read.read_word_db(option)
     print("IMPRESSIÓ WORD del mètode GET_WORD")
     print(type(word))
     print(word)
-
     return word

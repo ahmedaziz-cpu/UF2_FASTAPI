@@ -1,24 +1,36 @@
 import psycopg2
 
+
 def insert_data_csv_to_db(pos, data):
+    try:
+        # Establecer la conexión a la base de datos
+        conn = psycopg2.connect(
+            database="penjat",
+            user="user",
+            password="pass",
+            host="localhost",
+            port="5433"
+        )
 
-    conn = psycopg2.connect(
-        database="penjat",
-        user="user",
-        password="pass",
-        host="localhost",
-        port="5433"
-    )
+        cur = conn.cursor()
 
-    cur = conn.cursor()
-    sql = "INSERT INTO word (word, theme) VALUES (%s, %s);"
 
-    values = ((data.get("WORD")[pos], data.get("THEME")[pos]))
+        word = data.get("WORD")[pos]
+        theme = data.get("THEME")[pos]
 
-    cur.execute(sql, values)
-    conn.commit()
+        # Inserción de datos en la tabla
+        sql = "INSERT INTO word (word, theme) VALUES (%s, %s);"
+        values = (word, theme)
 
-    cur.close()
-    conn.close()
+        # Ejecutar la consulta de inserción
+        cur.execute(sql, values)
+        conn.commit()  # Confirmar la transacción
 
-    return {"Message":"Data inerted"}
+        cur.close()
+        conn.close()
+
+        return {"Message": "Data inserted successfully"}
+
+    except Exception as e:
+        # Manejar cualquier error durante la conexión o ejecución
+        return {"Error": str(e)}

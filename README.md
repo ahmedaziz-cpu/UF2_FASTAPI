@@ -5,7 +5,7 @@
 ![Captura](ACTIVITAT_10/imatges/captura1.png)
 ![Captura](ACTIVITAT_10/imatges/captura3.png)
 
-## 0.Captura del swagger amb tots els endpoints demanats
+## 1.Captura del swagger amb tots els endpoints demanats
 ![Captura](ACTIVITAT_10/imatges/captura5.png)
 
 

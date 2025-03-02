@@ -1,63 +1,156 @@
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
-from sqlalchemy.orm import Session
-import crud, models, schemas
-from typing import List
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from database import SessionLocal, engine
-
-models.Base.metadata.create_all(bind=engine)
+from typing import List, Optional
+import os
 
 app = FastAPI()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Montar el directorio de imágenes estáticas
+app.mount("/static", StaticFiles(directory="imatges"), name="static")
+
+# Tablas simuladas como diccionarios
+jugadores_db = {}
+partidas_db = {}
+intentos_db = {}
+
+# Modelos Pydantic
+class Jugador(BaseModel):
+    nombre: str
+    puntos_actuales: int
+    total_partidas: int
+    partidas_ganadas: int
+    partida_mas_puntos: int
+
+class Partida(BaseModel):
+    jugador_id: int
+    puntos: int
+    resultado: str
 
 class Intento(BaseModel):
+    partida_id: int
     letra: str
     palabra: str
+    error: Optional[str] = None  # Añadido para gestionar errores
 
-@app.get("/imagen")
+# Gestion de imagenes
+@app.get("/imatges", tags=["Multimedia"])
 async def render_image():
-    return FileResponse("static/imagen.jpg")
+    image_path = os.path.join("imatges", "imatgefons.jpg")  # Aquí el nombre de la imagen
+    if os.path.exists(image_path):
+        return FileResponse(image_path)
+    raise HTTPException(status_code=404, detail="Imagen no encontrada")
 
-@app.post("/nuevo_intento")
-async def nuevo_intento(intento: Intento):
-    return JSONResponse(content={"message": "Intento registrado", "data": intento.dict()})
-
-@app.get("/abecedario")
+# Gestión del abecedario y textos específicos
+@app.get("/abecedario", tags=["Juego"])
 async def abecedario():
-    letras = list("abcdefghijklmnopqrstuvwxyzñç")
+    letras = "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z Ñ Ç"
     return JSONResponse(content={"letras": letras})
 
-@app.get("/jugador/{id}")
-async def jugador(id: int):
-    jugador_info = {
-        "id": id,
-        "nombre": f"Jugador {id}",
-        "puntos_actuales": 100,
-        "total_partidas": 10,
-        "partidas_ganadas": 5,
-        "partida_mas_puntos": 200
-    }
-    return JSONResponse(content=jugador_info)
+@app.get("/render_text/començar_partida", tags=["Texto"])
+async def render_comencar_partida():
+    return JSONResponse(content={"texto": "Començar partida"})
 
-@app.post("/usuaris/", response_model=schemas.Usuari)
-def create_usuari(usuari: schemas.UsuariCreate, db: Session = Depends(get_db)):
-    return crud.create_usuari(db=db, usuari=usuari)
+@app.get("/render_text/espaciado", tags=["Texto"])
+async def render_text_espaciado():
+    texto = "C o m e n ç a r   p a r t i d a"
+    return JSONResponse(content={"texto": texto})
 
-@app.get("/usuaris/{usuari_id}", response_model=schemas.Usuari)
-def read_usuari(usuari_id: int, db: Session = Depends(get_db)):
-    db_usuari = crud.get_usuari(db, usuari_id=usuari_id)
-    if db_usuari is None:
-        raise HTTPException(status_code=404, detail="Usuari not found")
-    return db_usuari
+# CRUD para la tabla Jugadores
+@app.post("/jugadores/", tags=["Jugadores"])
+async def crear_jugador(jugador: Jugador):
+    id_nuevo = len(jugadores_db) + 1
+    jugadores_db[id_nuevo] = jugador.dict()
+    return {"id": id_nuevo, "jugador": jugador.dict()}
 
-@app.get("/usuaris/", response_model=List[schemas.Usuari])
-def read_usuaris(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    usuaris = crud.get_usuaris(db, skip=skip, limit=limit)
-    return usuaris
+@app.get("/jugadores/", tags=["Jugadores"])
+async def obtener_jugadores():
+    return jugadores_db
+
+@app.get("/jugadores/{id}", tags=["Jugadores"])
+async def obtener_jugador(id: int):
+    jugador = jugadores_db.get(id)
+    if jugador:
+        return jugador
+    raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+@app.put("/jugadores/{id}", tags=["Jugadores"])
+async def actualizar_jugador(id: int, jugador: Jugador):
+    if id in jugadores_db:
+        jugadores_db[id] = jugador.dict()
+        return {"id": id, "jugador": jugador.dict()}
+    raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+@app.delete("/jugadores/{id}", tags=["Jugadores"])
+async def eliminar_jugador(id: int):
+    if id in jugadores_db:
+        del jugadores_db[id]
+        return {"mensaje": "Jugador eliminado correctamente"}
+    raise HTTPException(status_code=404, detail="Jugador no encontrado")
+
+# CRUD para la tabla Partidas
+@app.post("/partidas/", tags=["Partidas"])
+async def crear_partida(partida: Partida):
+    id_nuevo = len(partidas_db) + 1
+    partidas_db[id_nuevo] = partida.dict()
+    return {"id": id_nuevo, "partida": partida.dict()}
+
+@app.get("/partidas/", tags=["Partidas"])
+async def obtener_partidas():
+    return partidas_db
+
+@app.get("/partidas/{id}", tags=["Partidas"])
+async def obtener_partida(id: int):
+    partida = partidas_db.get(id)
+    if partida:
+        return partida
+    raise HTTPException(status_code=404, detail="Partida no encontrada")
+
+@app.put("/partidas/{id}", tags=["Partidas"])
+async def actualizar_partida(id: int, partida: Partida):
+    if id in partidas_db:
+        partidas_db[id] = partida.dict()
+        return {"id": id, "partida": partida.dict()}
+    raise HTTPException(status_code=404, detail="Partida no encontrada")
+
+@app.delete("/partidas/{id}", tags=["Partidas"])
+async def eliminar_partida(id: int):
+    if id in partidas_db:
+        del partidas_db[id]
+        return {"mensaje": "Partida eliminada correctamente"}
+    raise HTTPException(status_code=404, detail="Partida no encontrada")
+
+# CRUD para la tabla Intentos
+@app.post("/intentos/", tags=["Intentos"])
+async def crear_intento(intento: Intento):
+    if len(intento.letra) != 1:  # Validar que la letra sea un solo caracter
+        intento.error = "La letra debe ser un solo carácter"
+    id_nuevo = len(intentos_db) + 1
+    intentos_db[id_nuevo] = intento.dict()
+    return {"id": id_nuevo, "intento": intento.dict()}
+
+@app.get("/intentos/", tags=["Intentos"])
+async def obtener_intentos():
+    return intentos_db
+
+@app.get("/intentos/{id}", tags=["Intentos"])
+async def obtener_intento(id: int):
+    intento = intentos_db.get(id)
+    if intento:
+        return intento
+    raise HTTPException(status_code=404, detail="Intento no encontrado")
+
+@app.put("/intentos/{id}", tags=["Intentos"])
+async def actualizar_intento(id: int, intento: Intento):
+    if id in intentos_db:
+        intentos_db[id] = intento.dict()
+        return {"id": id, "intento": intento.dict()}
+    raise HTTPException(status_code=404, detail="Intento no encontrado")
+
+@app.delete("/intentos/{id}", tags=["Intentos"])
+async def eliminar_intento(id: int):
+    if id in intentos_db:
+        del intentos_db[id]
+        return {"mensaje": "Intento eliminado correctamente"}
+    raise HTTPException(status_code=404, detail="Intento no encontrado")

@@ -1,5 +1,12 @@
 # Documentació ACTIVITAT 9
 
+## 0.Captures de Swagger i del postman
+![Captura](ACTIVITAT_9/imatges/captura1.png)
+![Captura](ACTIVITAT_9/imatges/captura2.png)
+![Captura](ACTIVITAT_9/imatges/captura3.png)
+![Captura](ACTIVITAT_9/imatges/captura4.png)
+
+
 ## 1. **PostgreSQL - Vista de la Taula d'Usuaris**
 
 Aquí es mostra una captura de pantalla de la taula `users` a **PostgreSQL**, on s'emmagatzemen els usuaris.

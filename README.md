@@ -19,7 +19,16 @@ En aquesta secció, et mostrem com interactuar amb els diferents endpoints de l'
 
    ![Captura de Abecedari](ACTIVITAT_11/imatges/captura3.png)
 
-### 4. **Y aqui una imatge del postgres amb les taules i triggers creats**
+### 4. **Per veure la imatge que hem posat com a render**
+
+   ![Captura imatge](ACTIVITAT_11/imatges/captura5.png)
+
+
+### 5. **Swagger format redoc**
+
+   ![Captura imatge](ACTIVITAT_11/imatges/captura4.png)
+
+### 6. **Y aqui una imatge del postgres amb les taules i triggers creats**
 
    ![Captura de Informació del Jugador](ACTIVITAT_11/imatges/postgres.png)
 
